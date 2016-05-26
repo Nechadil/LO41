@@ -1,0 +1,46 @@
+ void *tgv_eo( )
+{
+	int num=numtrain;	
+	pthread_mutex_lock(&num_mut);
+	numtrain++;
+	pthread_mutex_unlock(&num_mut);
+	
+	pthread_mutex_lock(&P2);
+	pthread_mutex_lock(&P3);
+	printf(" %66s%d %s\n","TGV",num,"départ");
+	sleep(1);
+	printf(" %42s%d %s\n","TGV",num,"dans Tunnel");
+
+
+
+
+
+
+
+
+
+printf ("TGV%d attend\n",num);
+	sleep(1);
+	printf("TGV%d départ Gare\n",num);
+	sleep(1);
+	printf(" %22s%d %s\n","TGV",num,"arrive Garage");
+	
+	pthread_mutex_unlock(&P0);
+	pthread_mutex_unlock(&P1);
+	
+	
+	printf(" %22s%d %s\n","TGV",num,"départ Garage");
+	
+	pthread_mutex_lock(&P2);	
+	pthread_mutex_lock(&P3);
+	
+	
+	
+	
+	
+	pthread_mutex_unlock(&P2);
+	pthread_mutex_unlock(&P3);
+	if (num==0)	pthread_exit(NULL);
+	else 
+	pthread_join(tgv[num--],NULL);
+}
