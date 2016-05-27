@@ -5,6 +5,7 @@
 int count=0;
 int numtrain=0;
 int nb_tgv_oe=5;
+int sensTGV=0;
 
 pthread_t tgv[5];
 pthread_mutex_t P0;
@@ -12,15 +13,28 @@ pthread_mutex_t num_mut;
 pthread_mutex_t P1;
 pthread_mutex_t P2;
 pthread_mutex_t P3;
-
-
+pthread_mutex_t sensTGV_mut=PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t   TGV_oe_cond=PTHREAD_COND_INITIALIZER;
+pthread_cond_t   TGV_eo_cond=PTHREAD_COND_INITIALIZER;
 
 void *tgv_oe( )
 {
 	int num=numtrain;	
+	
+	pthread_mutex_lock(&sensTGV_mut);
+	
+	if (sensTGV<0) pthread_cond_wait(&TGV_oe_cond,&sensTGV_mut);
+	sensTGV++;
+	
+	pthread_mutex_unlock(&sensTGV_mut);
+	
 	pthread_mutex_lock(&num_mut);
 	numtrain++;
 	pthread_mutex_unlock(&num_mut);
+	
+	
+	
+	
 	
 	pthread_mutex_lock(&P0);
 	pthread_mutex_lock(&P1);
@@ -45,8 +59,14 @@ void *tgv_oe( )
 	printf(" %83s%d %s\n","TGV_OE",num,"sort");
 	pthread_mutex_unlock(&P2);
 	pthread_mutex_unlock(&P3);
+
+	pthread_mutex_lock(&sensTGV_mut);
+	if (sensTGV==0) pthread_cond_signal(&TGV_eo_cond);
+	sensTGV--;
+	pthread_mutex_unlock(&sensTGV_mut);
+
 	if (num==0)	pthread_exit(NULL);
-	else 
+	else  
 	pthread_join(tgv[num--],NULL);
 }
 
@@ -59,9 +79,9 @@ void thread_TGV_oe(void)
                 printf("echec de la création  !\n");
  	       else
 	{
-	       count++;
+	        count++;
 		nb_tgv_oe--;
-       }
+        }
 	
         
 }
