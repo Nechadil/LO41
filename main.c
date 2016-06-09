@@ -4,6 +4,9 @@
 
 int count=0;
 int numtrain=0;
+int policy=SCHED_RR;
+
+
 
 int nb_TGV_oe=5;
 int nb_TGV_eo=5;
@@ -54,8 +57,9 @@ void *TGV_oe( )
 	
 	pthread_mutex_unlock(&sensTGV_mut);
 	
-	pthread_mutex_lock(&P0);
+	
 	pthread_mutex_lock(&P1);
+	pthread_mutex_lock(&P0);
 	pthread_mutex_lock(&garageTGV_mut);
 	printf ("TGV-->%d attend\n",num);
 	sleep(1);
@@ -63,9 +67,9 @@ void *TGV_oe( )
 	sleep(1);
 	printf(" %28s%d %s\n","TGV-->",num,"arrive Garage");
 	
-	pthread_mutex_unlock(&P0);
-	pthread_mutex_unlock(&P1);
 	
+	pthread_mutex_unlock(&P1);
+	pthread_mutex_unlock(&P0);
 	
 	printf(" %28s%d %s\n","TGV-->",num,"départ Garage");
 	pthread_mutex_unlock(&garageTGV_mut);
@@ -122,16 +126,18 @@ void *TGV_eo( )
 	pthread_mutex_unlock(&P2);
 	pthread_mutex_unlock(&P3);
 	
-	pthread_mutex_lock(&P0);
 	pthread_mutex_lock(&P1);
+	pthread_mutex_lock(&P0);
+	
 	printf(" %28s%d %s\n","TGV<--",num,"départ Garage");
 	pthread_mutex_unlock(&garageTGV_mut);
 	sleep(1);
 	printf ("TGV<--%d attend\n",num);
 	sleep(1);
 	printf("TGV<--%d départ Gare\n",num);
+	pthread_mutex_unlock(&P1);	
 	pthread_mutex_unlock(&P0);
-	pthread_mutex_unlock(&P1);
+
 	pthread_mutex_lock(&sensTGV_mut);
 	
 	sensTGV++;
@@ -156,17 +162,17 @@ void *GL_oe( )
 	
 	pthread_mutex_unlock(&sensGL_mut);
 	
-	pthread_mutex_lock(&P0);
 	pthread_mutex_lock(&P1);
+	pthread_mutex_lock(&P0);
 	pthread_mutex_lock(&garageGL_mut);
 	printf ("GL-->%d attend\n",num);
 	sleep(1);
 	printf("GL-->%d départ Gare\n",num);
 	sleep(1);
 	printf(" %28s%d %s\n","GL-->",num,"arrive Garage");
-	
-	pthread_mutex_unlock(&P0);
 	pthread_mutex_unlock(&P1);
+	pthread_mutex_unlock(&P0);
+	
 	
 	
 	printf(" %28s%d %s\n","GL-->",num,"départ Garage");
@@ -221,16 +227,19 @@ void *GL_eo( )
 	pthread_mutex_unlock(&P2);
 	pthread_mutex_unlock(&P3);
 	
-	pthread_mutex_lock(&P0);
 	pthread_mutex_lock(&P1);
+	pthread_mutex_lock(&P0);
+	
 	printf(" %28s%d %s\n","GL<--",num,"départ Garage");
 	pthread_mutex_unlock(&garageGL_mut);
 	sleep(1);
 	printf ("GL<--%d attend\n",num);
 	sleep(1);
 	printf("GL<--%d départ Gare\n",num);
-	pthread_mutex_unlock(&P0);
+	
 	pthread_mutex_unlock(&P1);
+	pthread_mutex_unlock(&P0);
+	
 	pthread_mutex_lock(&sensGL_mut);
 	
 	sensGL++;
@@ -251,10 +260,10 @@ void thread_TGV_oe(void)
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	struct sched_param param;
-	param.sched_priority = 3;
-	
+	param.sched_priority = 1;
+	pthread_attr_setschedpolicy(&attr,policy);
 	pthread_attr_setschedparam (&attr, &param);
-	
+
                 
         if((temp = pthread_create(&train[count],&attr, TGV_oe, NULL)) != 0)      
                 printf("echec de la création  !\n");
@@ -274,10 +283,11 @@ void thread_TGV_eo(void)
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	struct sched_param param;
-	param.sched_priority = 3;
+	param.sched_priority = 1;
+	pthread_attr_setschedpolicy(&attr,policy);
 	pthread_attr_setschedparam (&attr, &param);
-                
-        if((temp = pthread_create(&train[count], NULL, TGV_eo, NULL)) != 0)      
+
+        if((temp = pthread_create(&train[count], &attr, TGV_eo, NULL)) != 0)      
                 printf("echec de la création  !\n");
  	       else
 	{
@@ -296,10 +306,10 @@ void thread_GL_oe(void)
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	struct sched_param param;
-	param.sched_priority = 2;
-	
+	param.sched_priority = 50;
+	pthread_attr_setschedpolicy(&attr,policy);
 	pthread_attr_setschedparam (&attr, &param);
-	
+
                 
         if((temp = pthread_create(&train[count],&attr, GL_oe, NULL)) != 0)      
                 printf("echec de la création  !\n");
@@ -319,10 +329,13 @@ void thread_GL_eo(void)
 	pthread_attr_t attr;
 	pthread_attr_init(&attr);
 	struct sched_param param;
-	param.sched_priority = 2;
+	param.sched_priority = 50;
+	
+	pthread_attr_setschedpolicy(&attr,policy);
 	pthread_attr_setschedparam (&attr, &param);
+	
                 
-        if((temp = pthread_create(&train[count], NULL, GL_eo, NULL)) != 0)      
+        if((temp = pthread_create(&train[count], &attr, GL_eo, NULL)) != 0)      
                 printf("echec de la création  !\n");
  	       else
 	{
@@ -342,10 +355,11 @@ int main()
         printf("%10s%25s%25s%25s\n\n", "Gare", "Garage", "Tunnel","Voie");
 	while(1)         
 	{
-		if(nb_TGV_oe>0) thread_TGV_oe();
-		if(nb_TGV_eo>0) thread_TGV_eo();
 		if(nb_GL_oe>0) thread_GL_oe();
 		if(nb_GL_eo>0) thread_GL_eo();
+		if(nb_TGV_oe>0) thread_TGV_oe();
+		if(nb_TGV_eo>0) thread_TGV_eo();
+		
 	}
 
         printf("projet termine\n");
