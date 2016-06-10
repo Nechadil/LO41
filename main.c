@@ -1,21 +1,24 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <unistd.h>
+#include<stdlib.h>
 
 int count=0;
 int numtrain=0;
 int policy=SCHED_RR;
+int nb_random;
 
 
-
-int nb_TGV_oe=5;
-int nb_TGV_eo=5;
+int nb_TGV_oe=2;
+int nb_TGV_eo=2;
 int sensTGV=0;
 
-int nb_GL_oe=5;
-int nb_GL_eo=5;
+int nb_GL_oe=2;
+int nb_GL_eo=2;
 int sensGL=0;
 
+int nb_M_oe=2;
+int nb_M_eo=2;
 
 
 
@@ -38,6 +41,10 @@ pthread_mutex_t sensGL_mut=PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t   GL_oe_cond=PTHREAD_COND_INITIALIZER;
 pthread_cond_t   GL_eo_cond=PTHREAD_COND_INITIALIZER;
 
+pthread_mutex_t garageM_oe_mut=PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t garageM_eo_mut=PTHREAD_MUTEX_INITIALIZER;
+
+
 
 
 pthread_mutex_t num_mut=PTHREAD_MUTEX_INITIALIZER;
@@ -57,10 +64,10 @@ void *TGV_oe( )
 	
 	pthread_mutex_unlock(&sensTGV_mut);
 	
-	
+	pthread_mutex_lock(&garageTGV_mut);
 	pthread_mutex_lock(&P1);
 	pthread_mutex_lock(&P0);
-	pthread_mutex_lock(&garageTGV_mut);
+	
 	printf ("TGV-->%d attend\n",num);
 	sleep(1);
 	printf("TGV-->%d départ Gare\n",num);
@@ -70,12 +77,11 @@ void *TGV_oe( )
 	
 	pthread_mutex_unlock(&P1);
 	pthread_mutex_unlock(&P0);
-	
-	printf(" %28s%d %s\n","TGV-->",num,"départ Garage");
-	pthread_mutex_unlock(&garageTGV_mut);
-	
 	pthread_mutex_lock(&P2);	
 	pthread_mutex_lock(&P3);
+	printf(" %28s%d %s\n","TGV-->",num,"départ Garage");
+	
+	pthread_mutex_unlock(&garageTGV_mut);
 	sleep(1);
 	
 	printf(" %53s%d %s\n","TGV-->",num,"dans Tunnel");
@@ -114,10 +120,10 @@ void *TGV_eo( )
 	pthread_mutex_unlock(&sensTGV_mut);
 	
 	
-	
+	pthread_mutex_lock(&garageTGV_mut);
 	pthread_mutex_lock(&P2);	
 	pthread_mutex_lock(&P3);
-	pthread_mutex_lock(&garageTGV_mut);
+	
 	printf(" %83s%d %s\n","TGV<--",num,"départ");
 	sleep(1);
 	printf(" %53s%d %s\n","TGV<--",num,"dans Tunnel");
@@ -134,7 +140,7 @@ void *TGV_eo( )
 	sleep(1);
 	printf ("TGV<--%d attend\n",num);
 	sleep(1);
-	printf("TGV<--%d départ Gare\n",num);
+	printf("TGV<--%d sort\n",num);
 	pthread_mutex_unlock(&P1);	
 	pthread_mutex_unlock(&P0);
 
@@ -161,10 +167,10 @@ void *GL_oe( )
 	sensGL++;
 	
 	pthread_mutex_unlock(&sensGL_mut);
-	
+	pthread_mutex_lock(&garageGL_mut);
 	pthread_mutex_lock(&P1);
 	pthread_mutex_lock(&P0);
-	pthread_mutex_lock(&garageGL_mut);
+	
 	printf ("GL-->%d attend\n",num);
 	sleep(1);
 	printf("GL-->%d départ Gare\n",num);
@@ -173,13 +179,13 @@ void *GL_oe( )
 	pthread_mutex_unlock(&P1);
 	pthread_mutex_unlock(&P0);
 	
-	
+	pthread_mutex_lock(&P2);	
+	pthread_mutex_lock(&P3);
 	
 	printf(" %28s%d %s\n","GL-->",num,"départ Garage");
 	pthread_mutex_unlock(&garageGL_mut);
 	
-	pthread_mutex_lock(&P2);	
-	pthread_mutex_lock(&P3);
+	
 	sleep(1);
 	
 	printf(" %53s%d %s\n","GL-->",num,"dans Tunnel");
@@ -215,10 +221,10 @@ void *GL_eo( )
 	pthread_mutex_unlock(&sensGL_mut);
 	
 	
-	
+	pthread_mutex_lock(&garageGL_mut);
 	pthread_mutex_lock(&P2);	
 	pthread_mutex_lock(&P3);
-	pthread_mutex_lock(&garageGL_mut);
+	
 	printf(" %83s%d %s\n","GL<--",num,"départ");
 	sleep(1);
 	printf(" %53s%d %s\n","GL<--",num,"dans Tunnel");
@@ -235,7 +241,7 @@ void *GL_eo( )
 	sleep(1);
 	printf ("GL<--%d attend\n",num);
 	sleep(1);
-	printf("GL<--%d départ Gare\n",num);
+	printf("GL<--%d sort\n",num);
 	
 	pthread_mutex_unlock(&P1);
 	pthread_mutex_unlock(&P0);
@@ -249,6 +255,71 @@ void *GL_eo( )
 	pthread_exit(NULL);
 
 }
+
+void *M_oe( )
+{
+	pthread_mutex_lock(&num_mut);
+	int num=numtrain;	
+	numtrain++;
+	pthread_mutex_unlock(&num_mut);
+	
+	
+	pthread_mutex_lock(&garageM_oe_mut);
+	pthread_mutex_lock(&P1);
+	
+	printf("M-->%d départ Gare\n",num);
+	sleep(1);
+	printf(" %28s%d %s\n","M-->",num,"arrive Garage");
+	
+	
+	pthread_mutex_unlock(&P1);
+	pthread_mutex_lock(&P2);	
+	pthread_mutex_lock(&P3);
+	printf(" %28s%d %s\n","M-->",num,"départ Garage");
+	
+	pthread_mutex_unlock(&garageM_oe_mut);
+	sleep(1);
+	
+	printf(" %53s%d %s\n","M-->",num,"dans Tunnel");
+	sleep(1);
+	printf(" %83s%d %s\n","M-->",num,"sort");
+	pthread_mutex_unlock(&P2);
+	pthread_mutex_unlock(&P3);
+	
+	pthread_exit(NULL);
+
+}
+
+
+void *M_eo( )
+{
+	pthread_mutex_lock(&num_mut);
+	int num=numtrain;	
+	numtrain++;
+	pthread_mutex_unlock(&num_mut);
+	
+	pthread_mutex_lock(&garageM_eo_mut);
+	pthread_mutex_lock(&P2);	
+	pthread_mutex_lock(&P3);	
+	
+	printf(" %83s%d %s\n","M<--",num,"départ");
+	sleep(1);
+	printf(" %53s%d %s\n","M<--",num,"dans Tunnel");
+	sleep(1);
+	printf(" %28s%d %s\n","M<--",num,"arrive Garage");
+	pthread_mutex_unlock(&P2);
+	pthread_mutex_unlock(&P3);
+	pthread_mutex_lock(&P1);
+	pthread_mutex_unlock(&garageM_eo_mut);
+	printf(" %28s%d %s\n","M<--",num,"départ Garage");
+	sleep(1);
+	printf("M<--%d sort\n",num);
+	pthread_mutex_unlock(&P1);
+	pthread_exit(NULL);
+
+}
+
+
 
 
 
@@ -346,6 +417,52 @@ void thread_GL_eo(void)
 	
 }
 
+void thread_M_eo(void)
+{
+        int temp;
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	struct sched_param param;
+	param.sched_priority = 99;
+	
+	pthread_attr_setschedpolicy(&attr,policy);
+	pthread_attr_setschedparam (&attr, &param);
+	
+                
+        if((temp = pthread_create(&train[count], &attr, M_eo, NULL)) != 0)      
+                printf("echec de la création  !\n");
+ 	       else
+	{
+	       pthread_attr_destroy(&attr);
+		count++;
+		nb_M_eo--;
+        }
+	
+}
+
+void thread_M_oe(void)
+{
+        int temp;
+	pthread_attr_t attr;
+	pthread_attr_init(&attr);
+	struct sched_param param;
+	param.sched_priority = 99;
+	
+	pthread_attr_setschedpolicy(&attr,policy);
+	pthread_attr_setschedparam (&attr, &param);
+	
+                
+        if((temp = pthread_create(&train[count], &attr, M_oe, NULL)) != 0)      
+                printf("echec de la création  !\n");
+ 	       else
+	{
+	       pthread_attr_destroy(&attr);
+		count++;
+		nb_M_oe--;
+        }
+	
+}
+
 
 
 int main()
@@ -359,6 +476,33 @@ int main()
 		if(nb_GL_eo>0) thread_GL_eo();
 		if(nb_TGV_oe>0) thread_TGV_oe();
 		if(nb_TGV_eo>0) thread_TGV_eo();
+		if(nb_M_oe>0) thread_M_oe();
+		if(nb_M_eo>0) thread_M_eo();
+		nb_random=rand() % 6;
+
+		switch(nb_random)
+		{
+			case 0:  nb_TGV_eo++;
+					sleep(3);
+					break;
+			case 1:  nb_TGV_oe++;
+					sleep(3);
+					break;
+			case 2:  nb_GL_eo++;
+					sleep(3);
+					break;
+			case 3:  nb_GL_oe++;
+					sleep(3);
+					break;
+			case 4:  nb_M_eo++;
+					sleep(3);
+					break;
+			case 5:  nb_M_oe++;
+					sleep(3);
+					break;
+			defaut: printf("wrong");
+					break;				
+		}
 		
 	}
 
