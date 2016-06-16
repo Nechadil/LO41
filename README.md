@@ -2,7 +2,9 @@
 
 
 L'Université de Technologie de Belfort-Montbéliard (UTBM)
+
 Département Génie Informatique
+
 Li Dachen
 
 
@@ -11,7 +13,7 @@ Li Dachen
 
 1.Initialiser les nombres de train: 
 
-Les nombres de train par défaut sont définis par les variables 	*nb_TYPEDETRAIN_SENS* avec:
+Les nombres de train par défaut sont définis par les variables 	**_nb_TYPEDETRAIN_SENS_** avec:
 ```
 	TYPEDETRAIN= TGV/GL/M
 	SENS= oe(sens Ouest->Est)/ eo(sens Est->Ouest)`
