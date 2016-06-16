@@ -1,5 +1,5 @@
 #LISEZ-MOI: Gestion de la gare
----
+
 
 L'Université de Technologie de Belfort-Montbéliard (UTBM)
 Département Génie Informatique
@@ -8,7 +8,7 @@ Li Dachen
 
 
 ##Configuration:
----
+
 1.Initialiser les nombres de train: 
 
 Les nombres de train par défaut sont définis par les variables 	nb_TYPEDETRAIN_SENS avec:
@@ -23,5 +23,5 @@ Il existe une partie de code pour créer les nouveaux trains. Une variable globa
 
 
 ##Compilation(sous Linux):
----
+
 gcc -o main main.c -lpthread
