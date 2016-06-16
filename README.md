@@ -1,4 +1,4 @@
-##LISEZ-MOI: Gestion de la gare
+#LISEZ-MOI: Gestion de la gare
 ---
 
 L'Université de Technologie de Belfort-Montbéliard (UTBM)
@@ -7,7 +7,7 @@ Li Dachen
 
 
 
-#Configuration:
+##Configuration:
 ---
 1.Initialiser les nombres de train: 
 
@@ -22,6 +22,6 @@ Il existe une partie de code pour créer les nouveaux trains. Une variable globa
 
 
 
-#Compilation(sous Linux):
+##Compilation(sous Linux):
 ---
 gcc -o main main.c -lpthread
