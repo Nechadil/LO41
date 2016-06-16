@@ -8,6 +8,7 @@ int count=0;
 int numtrain=0;
 int policy=SCHED_RR;
 int nb_random;
+int ajoute=0;
 
 
 int nb_TGV_oe=5;
@@ -721,7 +722,7 @@ int main()
 		
 		
 		
-		if (count<100)
+		if (count<100 && ajoute==1)
 		{
 			nb_random=rand() % 6;			
 			sleep(10);			
