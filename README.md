@@ -16,7 +16,7 @@ Li Dachen
 Les nombres de train par défaut sont définis par les variables 	**_nb_TYPEDETRAIN_SENS_** avec:
 ```
 	TYPEDETRAIN= TGV/GL/M
-	SENS= oe(sens Ouest->Est)/ eo(sens Est->Ouest)`
+	SENS= oe(sens Ouest->Est)/ eo(sens Est->Ouest)
 ```
 
 2. Choisir si vous voulez ajouter les nouveaux trains ou pas:
