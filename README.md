@@ -1,4 +1,4 @@
-#LISEZ-MOI: Gestion de la gare
+# LISEZ-MOI: Gestion de la gare
 
 
 L'Université de Technologie de Belfort-Montbéliard (UTBM)
@@ -9,7 +9,7 @@ Li Dachen
 
 
 
-##Configuration:
+## Configuration:
 
 1.	Initialiser les nombres de train: 
 	Les nombres de train par défaut sont définis par les variables **_nb_TYPEDETRAIN_SENS_** avec:
@@ -25,7 +25,7 @@ Li Dachen
 
 
 
-##Compilation(sous Linux):
+## Compilation(sous Linux):
 
 ```
 gcc -o main main.c -lpthread
