@@ -1,4 +1,4 @@
-## LISEZ-MOI: Gestion de la gare
+# LISEZ-MOI: Gestion de la gare
 
 L'Université de Technologie de Belfort-Montbéliard (UTBM)
 
@@ -6,11 +6,11 @@ Département Génie Informatique
 
 Li Dachen
 
-Compilation(sous Linux):
+## Compilation(sous Linux):
 ```
 gcc -o main main.c -lpthread
 ```
-Exécution(sous Linux):
+## Exécution(sous Linux):
 ```
 ./main
 ```
